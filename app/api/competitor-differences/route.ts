@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { createChatCompletion } from '../../../lib/groq';
 
 export async function POST(req: Request) {
   console.log('\n⚖️ [Competitor Differences API] Starting Analysis');
@@ -50,10 +46,9 @@ export async function POST(req: Request) {
     "Company focuses on enterprise cloud solutions while competitor specializes in consumer mobile applications."
     `
 
-    console.log('🤖 [Competitor Differences API] Sending request to OpenAI');
-    const completion = await openai.chat.completions.create({
+    console.log('🤖 [Competitor Differences API] Sending request to Groq');
+    const completion = await createChatCompletion({
       messages: [{ role: "user", content: prompt }],
-      model: "gpt-4-1106-preview",
       response_format: { type: "json_object" },
     });
 

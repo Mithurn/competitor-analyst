@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { createChatCompletion } from '../../../lib/groq';
 
 export async function POST(req: Request) {
   console.log('\n🔍 [Company Basic API] Starting Analysis');
@@ -21,10 +17,10 @@ export async function POST(req: Request) {
       )
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('❌ [Company Basic API] Error: OpenAI API key is not configured');
+    if (!process.env.GROQ_API_KEY) {
+      console.error('❌ [Company Basic API] Error: Groq API key is not configured');
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured' },
+        { error: 'Groq API key is not configured' },
         { status: 500 }
       )
     }
@@ -43,10 +39,9 @@ export async function POST(req: Request) {
       }
     }`
 
-    console.log('🤖 [Company Basic API] Sending request to OpenAI');
-    const completion = await openai.chat.completions.create({
+    console.log('🤖 [Company Basic API] Sending request to Groq');
+    const completion = await createChatCompletion({
       messages: [{ role: "user", content: prompt }],
-      model: "gpt-4-1106-preview",
       response_format: { type: "json_object" },
     });
 

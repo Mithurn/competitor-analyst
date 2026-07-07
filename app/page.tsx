@@ -63,8 +63,12 @@ export default function Home() {
       const competitorsData = await competitorsResponse.json()
 
       // Step 4: Get competitor info and differences
-      setLoadingStep('Analyzing competitors...')
-      const competitorPromises = competitorsData.competitors.map(async (competitor: { name: string }) => {
+      // Processed one competitor at a time (not in parallel) to stay under the
+      // AI provider's rate limits.
+      const competitors = []
+      for (const competitor of competitorsData.competitors as { name: string }[]) {
+        setLoadingStep(`Analyzing competitor: ${competitor.name}...`)
+
         // Get competitor info
         const competitorInfoResponse = await fetch('/api/competitor-info', {
           method: 'POST',
@@ -97,7 +101,7 @@ export default function Home() {
 
         const differencesData = await differencesResponse.json()
 
-        return {
+        competitors.push({
           name: competitorInfo.competitor.name,
           description: competitorInfo.competitor.description,
           industry: competitorInfo.competitor.industry,
@@ -106,10 +110,8 @@ export default function Home() {
           foundingYear: competitorInfo.competitor.foundingYear,
           companyType: competitorInfo.competitor.companyType,
           differences: differencesData.differences.differencesList
-        }
-      })
-
-      const competitors = await Promise.all(competitorPromises)
+        })
+      }
 
       // Show the analysis component with all the data
       setAnalysisData({
